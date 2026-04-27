@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FluxPDF</string>
+    <string name="app_subtitle">Professional PDF Editor</string>
+
+    <string name="title_add_page">Add Page</string>
+    <string name="desc_add_page">Add blank pages to your PDF</string>
+
+    <string name="title_delete_page">Delete Pages</string>
+    <string name="desc_delete_page">Remove unwanted pages</string>
+
+    <string name="title_reorder">Reorder</string>
+    <string name="desc_reorder">Rearrange page order</string>
+
+    <string name="title_rotate">Rotate</string>
+    <string name="desc_rotate">Rotate pages by angle</string>
+
+    <string name="title_split">Split PDF</string>
+    <string name="desc_split">Split into two documents</string>
+
+    <string name="title_merge">Merge PDFs</string>
+    <string name="desc_merge">Combine multiple PDFs</string>
+
+    <string name="title_extract">Extract</string>
+    <string name="desc_extract">Extract specific pages</string>
+
+    <string name="title_crop">Crop Pages</string>
+    <string name="desc_crop">Trim page margins</string>
+
+    <string name="dialog_title_pages">Enter Page Numbers</string>
+    <string name="dialog_hint_pages">e.g. 1,3,5</string>
+    <string name="dialog_title_reorder">New Page Order</string>
+    <string name="dialog_hint_reorder">e.g. 3,1,2,4</string>
+    <string name="dialog_title_rotate">Rotate Pages</string>
+    <string name="dialog_hint_rotate_pages">Pages (e.g. 1,3) or leave blank for all</string>
+    <string name="dialog_hint_rotate_angle">Angle: 90, 180, or 270</string>
+    <string name="dialog_title_split">Split At Page</string>
+    <string name="dialog_hint_split">Page number to split after</string>
+    <string name="dialog_title_crop">Crop Margins (in points)</string>
+
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <string name="msg_success">Operation completed successfully!</string>
+    <string name="msg_error">Error: %1$s</string>
+    <string name="msg_pick_pdf">Select a PDF file</string>
+    <string name="msg_pick_pdfs">Select PDF files to merge</string>
+    <string name="msg_save_pdf">Save PDF as</string>
+    <string name="msg_processing">Processing…</string>
+    <string name="msg_total_pages">Total pages: %1$d</string>
+</resources>
