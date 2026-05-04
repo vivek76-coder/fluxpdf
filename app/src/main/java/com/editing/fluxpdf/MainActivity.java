@@ -3,7 +3,6 @@ package com.editing.fluxpdf;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -134,43 +133,48 @@ public class MainActivity extends AppCompatActivity {
      * Shows the appropriate dialog or goes directly to save.
      */
     private void onInputFileSelected() {
-        try {
-            int pageCount = PdfEditorUtils.getPageCount(this, inputUri);
-            String pageInfo = "Total pages: " + pageCount;
+        new Thread(() -> {
+            try {
+                int pageCount = PdfEditorUtils.getPageCount(this, inputUri);
+                String pageInfo = "Total pages: " + pageCount;
 
-            switch (currentOperation) {
-                case OP_ADD_PAGE:
-                    // No extra input needed, go to save
-                    savePdfLauncher.launch("added_page.pdf");
-                    break;
-                case OP_DELETE_PAGES:
-                    showPageNumberDialog("Delete Pages", pageInfo, "Pages to delete (e.g. 1,3,5)", () -> {
-                        savePdfLauncher.launch("deleted_pages.pdf");
-                    });
-                    break;
-                case OP_REORDER:
-                    showPageNumberDialog("Reorder Pages", pageInfo, "New order (e.g. 3,1,2,4)", () -> {
-                        savePdfLauncher.launch("reordered.pdf");
-                    });
-                    break;
-                case OP_ROTATE:
-                    showRotateDialog(pageInfo);
-                    break;
-                case OP_SPLIT:
-                    showSplitDialog(pageInfo, pageCount);
-                    break;
-                case OP_EXTRACT:
-                    showPageNumberDialog("Extract Pages", pageInfo, "Pages to extract (e.g. 1,3,5)", () -> {
-                        savePdfLauncher.launch("extracted.pdf");
-                    });
-                    break;
-                case OP_CROP:
-                    showCropDialog(pageInfo);
-                    break;
+                runOnUiThread(() -> {
+                    switch (currentOperation) {
+                        case OP_ADD_PAGE:
+                            // No extra input needed, go to save
+                            savePdfLauncher.launch("added_page.pdf");
+                            break;
+                        case OP_DELETE_PAGES:
+                            showPageNumberDialog("Delete Pages", pageInfo, "Pages to delete (e.g. 1,3,5)", () -> {
+                                savePdfLauncher.launch("deleted_pages.pdf");
+                            });
+                            break;
+                        case OP_REORDER:
+                            showPageNumberDialog("Reorder Pages", pageInfo, "New order (e.g. 3,1,2,4)", () -> {
+                                savePdfLauncher.launch("reordered.pdf");
+                            });
+                            break;
+                        case OP_ROTATE:
+                            showRotateDialog(pageInfo);
+                            break;
+                        case OP_SPLIT:
+                            showSplitDialog(pageInfo, pageCount);
+                            break;
+                        case OP_EXTRACT:
+                            showPageNumberDialog("Extract Pages", pageInfo, "Pages to extract (e.g. 1,3,5)", () -> {
+                                savePdfLauncher.launch("extracted.pdf");
+                            });
+                            break;
+                        case OP_CROP:
+                            showCropDialog(pageInfo);
+                            break;
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error reading PDF: " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
-        } catch (Exception e) {
-            Toast.makeText(this, "Error reading PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        }).start();
     }
 
     /**
@@ -249,6 +253,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showSplitDialog(String pageInfo, int totalPages) {
+        if (totalPages <= 1) {
+            Toast.makeText(this, "PDF must have at least 2 pages to split", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         int pad = dpToPx(20);

@@ -25,14 +25,12 @@ public class PdfEditorUtils {
      * Adds a blank page at the end of the PDF.
      */
     public static void addBlankPage(Context ctx, Uri inputUri, Uri outputUri) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-        PDDocument doc = PDDocument.load(is);
-        doc.addPage(new PDPage(PDRectangle.A4));
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        doc.save(os);
-        doc.close();
-        if (is != null) is.close();
-        if (os != null) os.close();
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument doc = PDDocument.load(is);
+             OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
+            doc.addPage(new PDPage(PDRectangle.A4));
+            doc.save(os);
+        }
     }
 
     /**
@@ -40,24 +38,22 @@ public class PdfEditorUtils {
      * @param pageNumbers 1-based page numbers to delete.
      */
     public static void deletePages(Context ctx, Uri inputUri, Uri outputUri, List<Integer> pageNumbers) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-        PDDocument doc = PDDocument.load(is);
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument doc = PDDocument.load(is);
+             OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
-        // Sort in descending order to avoid index shifting
-        List<Integer> sorted = new ArrayList<>(pageNumbers);
-        Collections.sort(sorted, Collections.reverseOrder());
+            // Sort in descending order to avoid index shifting and eliminate duplicates
+            List<Integer> sorted = new ArrayList<>(new java.util.HashSet<>(pageNumbers));
+            Collections.sort(sorted, Collections.reverseOrder());
 
-        for (int pageNum : sorted) {
-            if (pageNum >= 1 && pageNum <= doc.getNumberOfPages()) {
-                doc.removePage(pageNum - 1);
+            for (int pageNum : sorted) {
+                if (pageNum >= 1 && pageNum <= doc.getNumberOfPages()) {
+                    doc.removePage(pageNum - 1);
+                }
             }
-        }
 
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        doc.save(os);
-        doc.close();
-        if (is != null) is.close();
-        if (os != null) os.close();
+            doc.save(os);
+        }
     }
 
     /**
@@ -66,23 +62,20 @@ public class PdfEditorUtils {
      *                 page 3 becomes first, page 1 becomes second, etc.
      */
     public static void reorderPages(Context ctx, Uri inputUri, Uri outputUri, List<Integer> newOrder) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-        PDDocument srcDoc = PDDocument.load(is);
-        PDDocument destDoc = new PDDocument();
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument srcDoc = PDDocument.load(is);
+             PDDocument destDoc = new PDDocument();
+             OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
-        for (int pageNum : newOrder) {
-            if (pageNum >= 1 && pageNum <= srcDoc.getNumberOfPages()) {
-                PDPage importedPage = destDoc.importPage(srcDoc.getPage(pageNum - 1));
-                importedPage.setResources(srcDoc.getPage(pageNum - 1).getResources());
+            for (int pageNum : newOrder) {
+                if (pageNum >= 1 && pageNum <= srcDoc.getNumberOfPages()) {
+                    PDPage importedPage = destDoc.importPage(srcDoc.getPage(pageNum - 1));
+                    importedPage.setResources(srcDoc.getPage(pageNum - 1).getResources());
+                }
             }
-        }
 
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        destDoc.save(os);
-        destDoc.close();
-        srcDoc.close();
-        if (is != null) is.close();
-        if (os != null) os.close();
+            destDoc.save(os);
+        }
     }
 
     /**
@@ -92,29 +85,27 @@ public class PdfEditorUtils {
      */
     public static void rotatePages(Context ctx, Uri inputUri, Uri outputUri,
                                    List<Integer> pageNumbers, int angle) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-        PDDocument doc = PDDocument.load(is);
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument doc = PDDocument.load(is);
+             OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
-        if (pageNumbers == null || pageNumbers.isEmpty()) {
-            // Rotate all pages
-            for (int i = 0; i < doc.getNumberOfPages(); i++) {
-                PDPage page = doc.getPage(i);
-                page.setRotation((page.getRotation() + angle) % 360);
-            }
-        } else {
-            for (int pageNum : pageNumbers) {
-                if (pageNum >= 1 && pageNum <= doc.getNumberOfPages()) {
-                    PDPage page = doc.getPage(pageNum - 1);
+            if (pageNumbers == null || pageNumbers.isEmpty()) {
+                // Rotate all pages
+                for (int i = 0; i < doc.getNumberOfPages(); i++) {
+                    PDPage page = doc.getPage(i);
                     page.setRotation((page.getRotation() + angle) % 360);
                 }
+            } else {
+                for (int pageNum : pageNumbers) {
+                    if (pageNum >= 1 && pageNum <= doc.getNumberOfPages()) {
+                        PDPage page = doc.getPage(pageNum - 1);
+                        page.setRotation((page.getRotation() + angle) % 360);
+                    }
+                }
             }
-        }
 
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        doc.save(os);
-        doc.close();
-        if (is != null) is.close();
-        if (os != null) os.close();
+            doc.save(os);
+        }
     }
 
     /**
@@ -126,24 +117,21 @@ public class PdfEditorUtils {
      */
     public static void splitPdf(Context ctx, Uri inputUri, Uri outputUri,
                                 int splitAfterPage, boolean firstHalf) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-        PDDocument srcDoc = PDDocument.load(is);
-        PDDocument destDoc = new PDDocument();
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument srcDoc = PDDocument.load(is);
+             PDDocument destDoc = new PDDocument();
+             OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
-        int totalPages = srcDoc.getNumberOfPages();
-        int start = firstHalf ? 0 : splitAfterPage;
-        int end = firstHalf ? splitAfterPage : totalPages;
+            int totalPages = srcDoc.getNumberOfPages();
+            int start = firstHalf ? 0 : splitAfterPage;
+            int end = firstHalf ? splitAfterPage : totalPages;
 
-        for (int i = start; i < end; i++) {
-            destDoc.importPage(srcDoc.getPage(i));
+            for (int i = start; i < end; i++) {
+                destDoc.importPage(srcDoc.getPage(i));
+            }
+
+            destDoc.save(os);
         }
-
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        destDoc.save(os);
-        destDoc.close();
-        srcDoc.close();
-        if (is != null) is.close();
-        if (os != null) os.close();
     }
 
     /**
@@ -153,20 +141,22 @@ public class PdfEditorUtils {
         PDFMergerUtility merger = new PDFMergerUtility();
         List<InputStream> streams = new ArrayList<>();
 
-        for (Uri uri : inputUris) {
-            InputStream is = ctx.getContentResolver().openInputStream(uri);
-            streams.add(is);
-            merger.addSource(is);
+        try (OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
+            for (Uri uri : inputUris) {
+                InputStream is = ctx.getContentResolver().openInputStream(uri);
+                streams.add(is);
+                merger.addSource(is);
+            }
+            
+            merger.setDestinationStream(os);
+            merger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
+        } finally {
+            for (InputStream is : streams) {
+                if (is != null) {
+                    try { is.close(); } catch (IOException ignored) {}
+                }
+            }
         }
-
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        merger.setDestinationStream(os);
-        merger.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-
-        for (InputStream is : streams) {
-            if (is != null) is.close();
-        }
-        if (os != null) os.close();
     }
 
     /**
@@ -175,22 +165,19 @@ public class PdfEditorUtils {
      */
     public static void extractPages(Context ctx, Uri inputUri, Uri outputUri,
                                     List<Integer> pageNumbers) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-        PDDocument srcDoc = PDDocument.load(is);
-        PDDocument destDoc = new PDDocument();
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument srcDoc = PDDocument.load(is);
+             PDDocument destDoc = new PDDocument();
+             OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
-        for (int pageNum : pageNumbers) {
-            if (pageNum >= 1 && pageNum <= srcDoc.getNumberOfPages()) {
-                destDoc.importPage(srcDoc.getPage(pageNum - 1));
+            for (int pageNum : pageNumbers) {
+                if (pageNum >= 1 && pageNum <= srcDoc.getNumberOfPages()) {
+                    destDoc.importPage(srcDoc.getPage(pageNum - 1));
+                }
             }
-        }
 
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        destDoc.save(os);
-        destDoc.close();
-        srcDoc.close();
-        if (is != null) is.close();
-        if (os != null) os.close();
+            destDoc.save(os);
+        }
     }
 
     /**
@@ -204,49 +191,51 @@ public class PdfEditorUtils {
     public static void cropPages(Context ctx, Uri inputUri, Uri outputUri,
                                  List<Integer> pageNumbers,
                                  float top, float bottom, float left, float right) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-        PDDocument doc = PDDocument.load(is);
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument doc = PDDocument.load(is);
+             OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
-        List<Integer> targetPages;
-        if (pageNumbers == null || pageNumbers.isEmpty()) {
-            targetPages = new ArrayList<>();
-            for (int i = 1; i <= doc.getNumberOfPages(); i++) {
-                targetPages.add(i);
+            List<Integer> targetPages;
+            if (pageNumbers == null || pageNumbers.isEmpty()) {
+                targetPages = new ArrayList<>();
+                for (int i = 1; i <= doc.getNumberOfPages(); i++) {
+                    targetPages.add(i);
+                }
+            } else {
+                targetPages = pageNumbers;
             }
-        } else {
-            targetPages = pageNumbers;
-        }
 
-        for (int pageNum : targetPages) {
-            if (pageNum >= 1 && pageNum <= doc.getNumberOfPages()) {
-                PDPage page = doc.getPage(pageNum - 1);
-                PDRectangle mediaBox = page.getMediaBox();
-                PDRectangle newCropBox = new PDRectangle(
-                        mediaBox.getLowerLeftX() + left,
-                        mediaBox.getLowerLeftY() + bottom,
-                        mediaBox.getWidth() - left - right,
-                        mediaBox.getHeight() - top - bottom
-                );
-                page.setCropBox(newCropBox);
+            for (int pageNum : targetPages) {
+                if (pageNum >= 1 && pageNum <= doc.getNumberOfPages()) {
+                    PDPage page = doc.getPage(pageNum - 1);
+                    PDRectangle mediaBox = page.getMediaBox();
+                    
+                    float newWidth = mediaBox.getWidth() - left - right;
+                    float newHeight = mediaBox.getHeight() - top - bottom;
+                    
+                    if (newWidth > 0 && newHeight > 0) {
+                        PDRectangle newCropBox = new PDRectangle(
+                                mediaBox.getLowerLeftX() + left,
+                                mediaBox.getLowerLeftY() + bottom,
+                                newWidth,
+                                newHeight
+                        );
+                        page.setCropBox(newCropBox);
+                    }
+                }
             }
-        }
 
-        OutputStream os = ctx.getContentResolver().openOutputStream(outputUri);
-        doc.save(os);
-        doc.close();
-        if (is != null) is.close();
-        if (os != null) os.close();
+            doc.save(os);
+        }
     }
 
     /**
      * Returns the number of pages in a PDF.
      */
     public static int getPageCount(Context ctx, Uri uri) throws IOException {
-        InputStream is = ctx.getContentResolver().openInputStream(uri);
-        PDDocument doc = PDDocument.load(is);
-        int count = doc.getNumberOfPages();
-        doc.close();
-        if (is != null) is.close();
-        return count;
+        try (InputStream is = ctx.getContentResolver().openInputStream(uri);
+             PDDocument doc = PDDocument.load(is)) {
+            return doc.getNumberOfPages();
+        }
     }
 }
