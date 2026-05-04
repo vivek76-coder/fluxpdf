@@ -5,24 +5,42 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.LayoutInflater;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.editing.fluxpdf.databinding.ActivityPdfViewerBinding;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
+import com.tom_roush.pdfbox.pdmodel.PDDocumentCatalog;
+import com.tom_roush.pdfbox.pdmodel.common.PDRectangle;
+import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
+import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
+import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode;
+import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.destination.PDDestination;
+import com.tom_roush.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
 import com.tom_roush.pdfbox.rendering.PDFRenderer;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Activity for viewing PDF documents page by page.
  * Renders PDF pages as bitmaps using PDFBox-Android's PDFRenderer.
  * Supports opening from within the app and from external apps (file manager, browser, etc.)
+ * Includes a side drawer showing PDF bookmarks/outlines (topics).
  */
 public class PdfViewerActivity extends AppCompatActivity {
 
@@ -35,6 +53,10 @@ public class PdfViewerActivity extends AppCompatActivity {
     private int totalPages = 0;
     private float zoomLevel = 1.5f; // DPI multiplier: 1.0 = 72dpi, 1.5 = 108dpi, 2.0 = 144dpi
 
+    // Topics / Outlines
+    private List<String> topicTitles = new ArrayList<>();
+    private List<Integer> topicPages = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,8 +66,14 @@ public class PdfViewerActivity extends AppCompatActivity {
         binding = ActivityPdfViewerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Setup toolbar back button
-        binding.toolbar.setNavigationOnClickListener(v -> finish());
+        // Setup toolbar - toggle drawer on menu icon click
+        binding.toolbar.setNavigationOnClickListener(v -> {
+            if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                binding.drawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                binding.drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
         // Get PDF URI - check multiple sources
         Uri pdfUri = resolveUri();
@@ -63,6 +91,17 @@ public class PdfViewerActivity extends AppCompatActivity {
 
         // Page jump: tap on page info text to jump to a specific page
         binding.tvPageInfo.setOnClickListener(v -> showPageJumpDialog());
+
+        // Topics list item click -> jump to that page
+        binding.lvTopics.setOnItemClickListener((parent, view, position, id) -> {
+            int page = topicPages.get(position);
+            if (page >= 0 && page < totalPages) {
+                currentPage = page;
+                updatePageInfo();
+                renderCurrentPage();
+            }
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+        });
 
         loadPdf(pdfUri);
     }
@@ -103,9 +142,25 @@ public class PdfViewerActivity extends AppCompatActivity {
                 totalPages = document.getNumberOfPages();
                 renderer = new PDFRenderer(document);
 
+                // Extract bookmarks/outlines
+                extractOutlines();
+
+                // Calculate default zoom to fit width
+                if (totalPages > 0) {
+                    PDRectangle mediaBox = document.getPage(0).getMediaBox();
+                    float pageWidth = mediaBox.getWidth();
+                    if (pageWidth > 0) {
+                        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+                        // Subtract some padding (e.g., 32px)
+                        zoomLevel = (screenWidth - 32) / pageWidth;
+                    }
+                }
+
                 runOnUiThread(() -> {
                     updatePageInfo();
+                    updateZoomText();
                     renderCurrentPage();
+                    populateTopicsList();
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
@@ -114,6 +169,104 @@ public class PdfViewerActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+
+    /**
+     * Extracts bookmarks/outlines from the PDF document.
+     * If no bookmarks exist, generates a simple per-page list.
+     */
+    private void extractOutlines() {
+        topicTitles.clear();
+        topicPages.clear();
+
+        try {
+            PDDocumentCatalog catalog = document.getDocumentCatalog();
+            PDDocumentOutline outline = catalog.getDocumentOutline();
+
+            if (outline != null) {
+                collectOutlineItems(outline, 0);
+            }
+        } catch (Exception ignored) {
+        }
+
+        // If no bookmarks found, create simple page entries
+        if (topicTitles.isEmpty()) {
+            for (int i = 0; i < totalPages; i++) {
+                topicTitles.add("Page " + (i + 1));
+                topicPages.add(i);
+            }
+        }
+    }
+
+    /**
+     * Recursively collects outline items (bookmarks) with indentation.
+     */
+    private void collectOutlineItems(PDOutlineNode node, int depth) {
+        try {
+            PDOutlineItem current = node.getFirstChild();
+            while (current != null) {
+                // Create indented title
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < depth; i++) sb.append("    ");
+                sb.append(current.getTitle());
+                topicTitles.add(sb.toString());
+
+                // Try to resolve page number
+                int pageNum = resolveOutlinePage(current);
+                topicPages.add(pageNum);
+
+                // Recurse into children
+                if (current.getFirstChild() != null) {
+                    collectOutlineItems(current, depth + 1);
+                }
+
+                current = current.getNextSibling();
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Resolves the page number for an outline item.
+     */
+    private int resolveOutlinePage(PDOutlineItem item) {
+        try {
+            PDDestination dest = item.getDestination();
+            if (dest == null && item.getAction() != null) {
+                // Some PDFs use actions instead of destinations
+                return 0;
+            }
+            if (dest instanceof PDPageDestination) {
+                PDPageDestination pageDest = (PDPageDestination) dest;
+                int pageNum = pageDest.retrievePageNumber();
+                if (pageNum >= 0) return pageNum;
+            }
+        } catch (Exception ignored) {
+        }
+        return 0;
+    }
+
+    private void populateTopicsList() {
+        // Custom adapter using item_topic.xml
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this, R.layout.item_topic, R.id.tvTopicName, topicTitles) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                // Highlight current page topic
+                TextView tv = view.findViewById(R.id.tvTopicName);
+                if (topicPages.get(position) == currentPage) {
+                    tv.setTextColor(0xFF3F51B5); // highlight blue
+                } else {
+                    tv.setTextColor(0xFF333333); // default dark
+                }
+                return view;
+            }
+        };
+        binding.lvTopics.setAdapter(adapter);
+
+        // Update topic count
+        binding.tvTopicCount.setText(topicTitles.size() + " topics • Tap to jump");
     }
 
     private void navigatePage(int direction) {
@@ -170,11 +323,16 @@ public class PdfViewerActivity extends AppCompatActivity {
 
     private void zoom(float delta) {
         float newZoom = zoomLevel + delta;
-        if (newZoom >= 0.5f && newZoom <= 4.0f) {
+        if (newZoom >= 0.5f && newZoom <= 5.0f) {
             zoomLevel = newZoom;
-            binding.tvZoomLevel.setText(Math.round(zoomLevel * 100 / 1.5f) + "%");
+            updateZoomText();
             renderCurrentPage();
         }
+    }
+
+    private void updateZoomText() {
+        // Show percentage relative to 1.0 scale (72 DPI)
+        binding.tvZoomLevel.setText(Math.round(zoomLevel * 100) + "%");
     }
 
     private void updatePageInfo() {
@@ -199,6 +357,15 @@ public class PdfViewerActivity extends AppCompatActivity {
                         Toast.makeText(this, "Error rendering page: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         }).start();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
