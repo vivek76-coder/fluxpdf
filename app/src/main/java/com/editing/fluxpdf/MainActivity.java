@@ -14,8 +14,18 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.editing.fluxpdf.databinding.ActivityMainBinding;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
+import com.tom_roush.pdfbox.pdmodel.PDDocument;
+import com.tom_roush.pdfbox.pdmodel.PDPage;
+import com.tom_roush.pdfbox.pdmodel.PDPageContentStream;
+import com.tom_roush.pdfbox.pdmodel.common.PDRectangle;
+import com.tom_roush.pdfbox.pdmodel.font.PDType1Font;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int OP_EXTRACT = 7;
     private static final int OP_CROP = 8;
     private static final int OP_VIEW = 9;
+    private static final int OP_OCR = 10;
+    private static final int OP_COMPRESS = 11;
 
     private int currentOperation = 0;
     private Uri inputUri;
@@ -44,12 +56,15 @@ public class MainActivity extends AppCompatActivity {
     private int splitAfterPage = 1;
     private float cropTop, cropBottom, cropLeft, cropRight;
     private boolean isSavingSecondHalf = false;
+    private int compressionQuality = 1; // 0=Low, 1=Medium, 2=High
 
     // Activity Result Launchers
     private ActivityResultLauncher<String[]> pickSinglePdfLauncher;
     private ActivityResultLauncher<String[]> pickMultiplePdfsLauncher;
     private ActivityResultLauncher<String> savePdfLauncher;
     private ActivityResultLauncher<String> saveSplitSecondLauncher;
+    private ActivityResultLauncher<String[]> pickImageLauncher;
+    private Uri collectedImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +121,16 @@ public class MainActivity extends AppCompatActivity {
                         performSplitSecondHalf(uri);
                     }
                 });
+
+        // Launcher to pick an image for OCR
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.OpenDocument(),
+                uri -> {
+                    if (uri != null) {
+                        collectedImageUri = uri;
+                        savePdfLauncher.launch("ocr_result.pdf");
+                    }
+                });
     }
 
     private void setupClickListeners() {
@@ -118,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
         binding.cardExtract.setOnClickListener(v -> startOperation(OP_EXTRACT));
         binding.cardCrop.setOnClickListener(v -> startOperation(OP_CROP));
         binding.cardViewPdf.setOnClickListener(v -> startOperation(OP_VIEW));
+        binding.cardOcr.setOnClickListener(v -> startOperation(OP_OCR));
+        binding.cardCompress.setOnClickListener(v -> startOperation(OP_COMPRESS));
     }
 
     private void startOperation(int operation) {
@@ -126,6 +153,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (operation == OP_MERGE) {
             pickMultiplePdfsLauncher.launch(new String[]{"application/pdf"});
+        } else if (operation == OP_OCR) {
+            pickImageLauncher.launch(new String[]{"image/*"});
         } else {
             pickSinglePdfLauncher.launch(new String[]{"application/pdf"});
         }
@@ -173,6 +202,9 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case OP_VIEW:
                             openPdfViewer();
+                            break;
+                        case OP_COMPRESS:
+                            showCompressDialog();
                             break;
                     }
                 });
@@ -381,6 +413,12 @@ public class MainActivity extends AppCompatActivity {
                         PdfEditorUtils.cropPages(this, inputUri, outputUri, collectedPageNumbers,
                                 cropTop, cropBottom, cropLeft, cropRight);
                         break;
+                    case OP_COMPRESS:
+                        PdfEditorUtils.compressPdf(this, inputUri, outputUri, compressionQuality);
+                        break;
+                    case OP_OCR:
+                        performOcr(collectedImageUri, outputUri);
+                        return; // Toast handled in performOcr
                 }
                 runOnUiThread(() ->
                         Toast.makeText(this, "✅ Operation completed successfully!", Toast.LENGTH_LONG).show());
@@ -414,6 +452,56 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void performOcr(Uri imageUri, Uri outputUri) {
+        try {
+            InputImage image = InputImage.fromFilePath(this, imageUri);
+            com.google.mlkit.vision.text.TextRecognizer recognizer = 
+                TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
+            recognizer.process(image)
+                    .addOnSuccessListener(text -> {
+                        saveTextToPdf(text.getText(), outputUri);
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "OCR Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+        } catch (Exception e) {
+            Toast.makeText(this, "Error processing image: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void saveTextToPdf(String text, Uri outputUri) {
+        new Thread(() -> {
+            try (PDDocument doc = new PDDocument();
+                 OutputStream os = getContentResolver().openOutputStream(outputUri)) {
+                
+                PDPage page = new PDPage(PDRectangle.A4);
+                doc.addPage(page);
+                
+                try (PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
+                    contentStream.beginText();
+                    contentStream.setFont(PDType1Font.HELVETICA, 12);
+                    contentStream.newLineAtOffset(50, 750);
+                    
+                    // Simple line wrapping
+                    String[] lines = text.split("\n");
+                    for (String line : lines) {
+                        // Limit line length for simplicity
+                        if (line.length() > 80) line = line.substring(0, 80);
+                        contentStream.showText(line);
+                        contentStream.newLineAtOffset(0, -15);
+                    }
+                    contentStream.endText();
+                }
+                
+                doc.save(os);
+                runOnUiThread(() -> Toast.makeText(this, "✅ OCR PDF saved successfully!", Toast.LENGTH_LONG).show());
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "❌ Error saving OCR PDF: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
     // ---- Helpers ----
 
     private List<Integer> parsePageNumbers(String text) {
@@ -438,5 +526,17 @@ public class MainActivity extends AppCompatActivity {
 
     private int dpToPx(int dp) {
         return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+
+    private void showCompressDialog() {
+        String[] options = {"Low (Smallest file, lower quality)", "Medium (Balanced)", "High (Best quality, larger file)"};
+        new AlertDialog.Builder(this)
+                .setTitle("Select Compression Quality")
+                .setItems(options, (dialog, which) -> {
+                    compressionQuality = which;
+                    savePdfLauncher.launch("compressed.pdf");
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }

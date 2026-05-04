@@ -17,75 +17,7 @@
         app:title="PDF Viewer"
         app:navigationIcon="?attr/homeAsUpIndicator" />
 
-    <!-- Page info bar -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="8dp"
-        android:background="@color/colorSurface">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPrevPage"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:text="‹ Prev"
-            android:textSize="12sp"
-            app:cornerRadius="8dp" />
-
-        <TextView
-            android:id="@+id/tvPageInfo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="Page 1 / 1"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorTextPrimary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNextPage"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:text="Next ›"
-            android:textSize="12sp"
-            app:cornerRadius="8dp" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/cardIconBgCrop" />
-
-    <!-- Scrollable PDF page view -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fillViewport="true">
-
-            <ImageView
-                android:id="@+id/ivPdfPage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:padding="8dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
-                android:contentDescription="PDF page" />
-        </HorizontalScrollView>
-    </ScrollView>
-
-    <!-- Zoom controls -->
+    <!-- Zoom controls (Moved to Top) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -127,6 +59,74 @@
             android:padding="0dp"
             android:insetTop="0dp"
             android:insetBottom="0dp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/cardIconBgCrop" />
+
+    <!-- Scrollable PDF page view -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true">
+
+            <ImageView
+                android:id="@+id/ivPdfPage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="8dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:contentDescription="PDF page" />
+        </HorizontalScrollView>
+    </ScrollView>
+
+    <!-- Page info bar (Moved to Bottom) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:background="@color/colorSurface">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPrevPage"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="‹ Prev"
+            android:textSize="12sp"
+            app:cornerRadius="8dp" />
+
+        <TextView
+            android:id="@+id/tvPageInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Page 1 / 1"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorTextPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNextPage"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Next ›"
+            android:textSize="12sp"
+            app:cornerRadius="8dp" />
     </LinearLayout>
 
 </LinearLayout>

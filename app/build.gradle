@@ -41,6 +41,7 @@ dependencies {
     implementation libs.appcompat
     implementation libs.material
     implementation 'com.tom-roush:pdfbox-android:2.0.27.0'
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

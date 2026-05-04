@@ -1,14 +1,23 @@
 package com.editing.fluxpdf;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 
+import com.tom_roush.pdfbox.cos.COSBase;
+import com.tom_roush.pdfbox.cos.COSDictionary;
+import com.tom_roush.pdfbox.cos.COSName;
 import com.tom_roush.pdfbox.io.MemoryUsageSetting;
 import com.tom_roush.pdfbox.multipdf.PDFMergerUtility;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.pdmodel.PDPage;
+import com.tom_roush.pdfbox.pdmodel.PDResources;
 import com.tom_roush.pdfbox.pdmodel.common.PDRectangle;
+import com.tom_roush.pdfbox.pdmodel.graphics.image.JPEGFactory;
+import com.tom_roush.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -236,6 +245,58 @@ public class PdfEditorUtils {
         try (InputStream is = ctx.getContentResolver().openInputStream(uri);
              PDDocument doc = PDDocument.load(is)) {
             return doc.getNumberOfPages();
+        }
+    }
+
+    /**
+     * Compresses the PDF by downsampling all embedded images.
+     * @param quality  0=Low (worst quality, smallest size), 1=Medium, 2=High (best quality, larger size)
+     */
+    public static void compressPdf(Context ctx, Uri inputUri, Uri outputUri, int quality) throws IOException {
+        // Map quality level to JPEG quality percent
+        int jpegQuality;
+        switch (quality) {
+            case 0:  jpegQuality = 30; break;  // Low
+            case 1:  jpegQuality = 60; break;  // Medium
+            default: jpegQuality = 85; break;  // High
+        }
+
+        // Write to a byte array first to avoid PDFBox closing the stream prematurely
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
+             PDDocument doc = PDDocument.load(is)) {
+
+            // Iterate all pages and compress image XObjects
+            for (PDPage page : doc.getPages()) {
+                PDResources resources = page.getResources();
+                if (resources == null) continue;
+                for (COSName xObjectName : resources.getXObjectNames()) {
+                    try {
+                        com.tom_roush.pdfbox.pdmodel.graphics.PDXObject xObject = resources.getXObject(xObjectName);
+                        if (xObject instanceof PDImageXObject) {
+                            PDImageXObject image = (PDImageXObject) xObject;
+                            Bitmap bmp = image.getImage();
+                            if (bmp == null) continue;
+
+                            // Re-encode as JPEG at the target quality
+                            PDImageXObject compressed = JPEGFactory.createFromImage(doc, bmp, jpegQuality / 100f);
+                            resources.put(xObjectName, compressed);
+                        }
+                    } catch (Exception ignored) {
+                        // Skip XObjects that can't be processed
+                    }
+                }
+            }
+
+            doc.save(buffer);
+        }
+
+        // Now write the buffer to the output URI
+        try (OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
+            if (os == null) throw new IOException("Cannot open output stream");
+            os.write(buffer.toByteArray());
+            os.flush();
         }
     }
 }

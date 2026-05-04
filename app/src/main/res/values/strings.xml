@@ -28,6 +28,10 @@
     <string name="desc_crop">Trim page margins</string>
     <string name="title_view">View PDF</string>
     <string name="desc_view">View and read documents</string>
+    <string name="title_ocr">Image to Text</string>
+    <string name="desc_ocr">Extract text from images</string>
+    <string name="title_compress">Compress PDF</string>
+    <string name="desc_compress">Reduce file size</string>
 
     <string name="dialog_title_pages">Enter Page Numbers</string>
     <string name="dialog_hint_pages">e.g. 1,3,5</string>
