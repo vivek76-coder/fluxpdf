@@ -23,6 +23,7 @@
     <color name="cardIconBgMerge">#FFE0F7FA</color>
     <color name="cardIconBgExtract">#FFF3E5F5</color>
     <color name="cardIconBgCrop">#FFEDE7F6</color>
+    <color name="cardIconBgView">#FFE8F5E9</color>
 
     <color name="cardIconAddPage">#FF4CAF50</color>
     <color name="cardIconDelete">#FFF44336</color>
@@ -32,4 +33,5 @@
     <color name="cardIconMerge">#FF00BCD4</color>
     <color name="cardIconExtract">#FF9C27B0</color>
     <color name="cardIconCrop">#FF673AB7</color>
+    <color name="cardIconView">#FF4CAF50</color>
 </resources>

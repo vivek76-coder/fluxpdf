@@ -1,5 +1,6 @@
 package com.editing.fluxpdf;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int OP_MERGE = 6;
     private static final int OP_EXTRACT = 7;
     private static final int OP_CROP = 8;
+    private static final int OP_VIEW = 9;
 
     private int currentOperation = 0;
     private Uri inputUri;
@@ -115,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         binding.cardMerge.setOnClickListener(v -> startOperation(OP_MERGE));
         binding.cardExtract.setOnClickListener(v -> startOperation(OP_EXTRACT));
         binding.cardCrop.setOnClickListener(v -> startOperation(OP_CROP));
+        binding.cardViewPdf.setOnClickListener(v -> startOperation(OP_VIEW));
     }
 
     private void startOperation(int operation) {
@@ -167,6 +170,9 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case OP_CROP:
                             showCropDialog(pageInfo);
+                            break;
+                        case OP_VIEW:
+                            openPdfViewer();
                             break;
                     }
                 });
@@ -396,6 +402,16 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(this, "❌ Error saving second part: " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
+    }
+
+    private void openPdfViewer() {
+        if (inputUri != null) {
+            Intent intent = new Intent(this, PdfViewerActivity.class);
+            intent.putExtra(PdfViewerActivity.EXTRA_PDF_URI, inputUri);
+            // Grant read permission to the viewer activity
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        }
     }
 
     // ---- Helpers ----

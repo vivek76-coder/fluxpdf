@@ -23,6 +23,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".PdfViewerActivity"
+            android:exported="false"
+            android:label="PDF Viewer" />
+
     </application>
 
 </manifest>
