@@ -2,6 +2,7 @@ package com.editing.fluxpdf;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
@@ -56,6 +57,10 @@ public class PdfViewerActivity extends AppCompatActivity {
     // Topics / Outlines
     private List<String> topicTitles = new ArrayList<>();
     private List<Integer> topicPages = new ArrayList<>();
+
+    // Track current render to avoid race conditions
+    private volatile int renderGeneration = 0;
+    private Bitmap currentBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +141,7 @@ public class PdfViewerActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 InputStream is = getContentResolver().openInputStream(uri);
-                document = PDDocument.load(is);
+                document = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
                 if (is != null) is.close();
 
                 totalPages = document.getNumberOfPages();
@@ -162,7 +167,7 @@ public class PdfViewerActivity extends AppCompatActivity {
                     renderCurrentPage();
                     populateTopicsList();
                 });
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Error loading PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     finish();
@@ -341,18 +346,58 @@ public class PdfViewerActivity extends AppCompatActivity {
         binding.btnNextPage.setEnabled(currentPage < totalPages - 1);
     }
 
+    /**
+     * Safely calculates the maximum render scale that won't exceed
+     * Android's hardware texture limit or cause OOM.
+     */
+    private float safeRenderScale(float pageW, float pageH, float desiredScale) {
+        // Android hardware texture limit is typically 4096px, stay under it
+        float maxDim = Math.max(pageW, pageH) * desiredScale;
+        if (maxDim > 4096f) {
+            desiredScale = 4096f / Math.max(pageW, pageH);
+        }
+        // Also cap total pixel count to ~16 megapixels to avoid OOM
+        float totalPixels = (pageW * desiredScale) * (pageH * desiredScale);
+        if (totalPixels > 16_000_000f) {
+            desiredScale = (float) Math.sqrt(16_000_000.0 / (pageW * pageH));
+        }
+        return Math.max(desiredScale, 0.25f);
+    }
+
     private void renderCurrentPage() {
         if (renderer == null) return;
 
+        final int thisGeneration = ++renderGeneration;
+
         new Thread(() -> {
             try {
-                // Render page at the current zoom level (scale relative to 72 DPI)
-                Bitmap bitmap = renderer.renderImage(currentPage, zoomLevel);
+                // Abort if a newer render was requested
+                if (thisGeneration != renderGeneration) return;
+
+                PDRectangle mediaBox = document.getPage(currentPage).getMediaBox();
+                float pageW = mediaBox.getWidth();
+                float pageH = mediaBox.getHeight();
+
+                float scale = safeRenderScale(pageW, pageH, zoomLevel);
+                Bitmap bitmap = renderer.renderImage(currentPage, scale);
+
+                if (thisGeneration != renderGeneration) {
+                    // A newer render was requested while we were working; discard
+                    bitmap.recycle();
+                    return;
+                }
 
                 runOnUiThread(() -> {
+                    if (thisGeneration != renderGeneration) return;
+                    // Recycle old bitmap
+                    if (currentBitmap != null && !currentBitmap.isRecycled()) {
+                        currentBitmap.recycle();
+                    }
+                    currentBitmap = bitmap;
                     binding.ivPdfPage.setImageBitmap(bitmap);
                 });
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                if (thisGeneration != renderGeneration) return;
                 runOnUiThread(() ->
                         Toast.makeText(this, "Error rendering page: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
@@ -371,10 +416,12 @@ public class PdfViewerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (currentBitmap != null && !currentBitmap.isRecycled()) {
+            currentBitmap.recycle();
+            currentBitmap = null;
+        }
         if (document != null) {
-            try {
-                document.close();
-            } catch (Exception ignored) {}
+            try { document.close(); } catch (Exception ignored) {}
         }
     }
 }

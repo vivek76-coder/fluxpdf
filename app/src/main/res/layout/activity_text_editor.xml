@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorHeaderBg"
+        app:titleTextColor="@color/white"
+        app:navigationIconTint="@color/white"
+        app:title="Edit Text"
+        app:navigationIcon="@drawable/ic_menu" />
+
+    <!-- Top toolbar with editing tools -->
+    <HorizontalScrollView
+        android:id="@+id/toolbarScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:background="@color/colorSurface"
+        android:elevation="2dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="6dp"
+            android:gravity="center_vertical">
+
+            <!-- Add Text Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddText"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="＋ Add"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="4dp"
+                app:icon="@drawable/ic_add_page"
+                app:iconSize="16dp"
+                app:iconTint="@color/cardIconAddPage"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <!-- Edit Text Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditText"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Edit"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="4dp"
+                app:icon="@drawable/ic_edit_text"
+                app:iconSize="16dp"
+                app:iconTint="@color/cardIconRotate"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <!-- Delete Text Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeleteText"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Delete"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="4dp"
+                app:icon="@drawable/ic_delete_page"
+                app:iconSize="16dp"
+                app:iconTint="@color/cardIconDelete"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <!-- Font Size Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFontSize"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Size"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="4dp"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <!-- Font Color Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFontColor"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Color"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="4dp"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <!-- Font Style Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFontStyle"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Style"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="4dp"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <!-- Move Text Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMoveText"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Move"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="4dp"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/cardIconBgCrop" />
+
+    <!-- PDF page canvas area with scrolling -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true">
+
+            <FrameLayout
+                android:id="@+id/canvasContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <!-- PDF page bitmap -->
+                <ImageView
+                    android:id="@+id/ivPdfPage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:contentDescription="PDF page for editing" />
+
+                <!-- Overlay view for text elements and selection -->
+                <com.editing.fluxpdf.TextOverlayView
+                    android:id="@+id/textOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+        </HorizontalScrollView>
+    </ScrollView>
+
+    <!-- Bottom bar: page navigation + save -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:background="@color/colorSurface"
+        android:elevation="4dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPrevPage"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="‹ Prev"
+            android:textSize="12sp"
+            app:cornerRadius="8dp" />
+
+        <TextView
+            android:id="@+id/tvPageInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Page 1 / 1"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorTextPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNextPage"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Next ›"
+            android:textSize="12sp"
+            app:cornerRadius="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="💾 Save"
+            android:textSize="12sp"
+            android:textAllCaps="false"
+            app:cornerRadius="8dp"
+            android:backgroundTint="@color/cardIconAddPage" />
+
+    </LinearLayout>
+
+</LinearLayout>

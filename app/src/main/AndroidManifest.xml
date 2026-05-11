@@ -42,6 +42,17 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".PdfTextEditorActivity"
+            android:exported="true"
+            android:label="Edit Text">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/pdf" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

@@ -32,6 +32,8 @@
     <string name="desc_ocr">Extract text from images</string>
     <string name="title_compress">Compress PDF</string>
     <string name="desc_compress">Reduce file size</string>
+    <string name="title_edit_text">Edit Text</string>
+    <string name="desc_edit_text">Change words, size, color and position</string>
 
     <string name="dialog_title_pages">Enter Page Numbers</string>
     <string name="dialog_hint_pages">e.g. 1,3,5</string>

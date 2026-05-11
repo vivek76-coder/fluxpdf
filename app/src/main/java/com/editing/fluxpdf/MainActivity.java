@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int OP_VIEW = 9;
     private static final int OP_OCR = 10;
     private static final int OP_COMPRESS = 11;
+    private static final int OP_EDIT_TEXT = 12;
 
     private int currentOperation = 0;
     private Uri inputUri;
@@ -145,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         binding.cardViewPdf.setOnClickListener(v -> startOperation(OP_VIEW));
         binding.cardOcr.setOnClickListener(v -> startOperation(OP_OCR));
         binding.cardCompress.setOnClickListener(v -> startOperation(OP_COMPRESS));
+        binding.cardEditText.setOnClickListener(v -> startOperation(OP_EDIT_TEXT));
     }
 
     private void startOperation(int operation) {
@@ -205,6 +207,9 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case OP_COMPRESS:
                             showCompressDialog();
+                            break;
+                        case OP_EDIT_TEXT:
+                            openPdfTextEditor();
                             break;
                     }
                 });
@@ -447,6 +452,15 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, PdfViewerActivity.class);
             intent.putExtra(PdfViewerActivity.EXTRA_PDF_URI, inputUri);
             // Grant read permission to the viewer activity
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        }
+    }
+
+    private void openPdfTextEditor() {
+        if (inputUri != null) {
+            Intent intent = new Intent(this, PdfTextEditorActivity.class);
+            intent.putExtra(PdfTextEditorActivity.EXTRA_PDF_URI, inputUri);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         }

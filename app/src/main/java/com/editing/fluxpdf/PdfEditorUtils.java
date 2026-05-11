@@ -35,7 +35,7 @@ public class PdfEditorUtils {
      */
     public static void addBlankPage(Context ctx, Uri inputUri, Uri outputUri) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument doc = PDDocument.load(is);
+             PDDocument doc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
              OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
             doc.addPage(new PDPage(PDRectangle.A4));
             doc.save(os);
@@ -48,7 +48,7 @@ public class PdfEditorUtils {
      */
     public static void deletePages(Context ctx, Uri inputUri, Uri outputUri, List<Integer> pageNumbers) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument doc = PDDocument.load(is);
+             PDDocument doc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
              OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
             // Sort in descending order to avoid index shifting and eliminate duplicates
@@ -72,7 +72,7 @@ public class PdfEditorUtils {
      */
     public static void reorderPages(Context ctx, Uri inputUri, Uri outputUri, List<Integer> newOrder) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument srcDoc = PDDocument.load(is);
+             PDDocument srcDoc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
              PDDocument destDoc = new PDDocument();
              OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
@@ -95,7 +95,7 @@ public class PdfEditorUtils {
     public static void rotatePages(Context ctx, Uri inputUri, Uri outputUri,
                                    List<Integer> pageNumbers, int angle) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument doc = PDDocument.load(is);
+             PDDocument doc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
              OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
             if (pageNumbers == null || pageNumbers.isEmpty()) {
@@ -127,7 +127,7 @@ public class PdfEditorUtils {
     public static void splitPdf(Context ctx, Uri inputUri, Uri outputUri,
                                 int splitAfterPage, boolean firstHalf) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument srcDoc = PDDocument.load(is);
+             PDDocument srcDoc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
              PDDocument destDoc = new PDDocument();
              OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
@@ -175,7 +175,7 @@ public class PdfEditorUtils {
     public static void extractPages(Context ctx, Uri inputUri, Uri outputUri,
                                     List<Integer> pageNumbers) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument srcDoc = PDDocument.load(is);
+             PDDocument srcDoc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
              PDDocument destDoc = new PDDocument();
              OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
@@ -201,7 +201,7 @@ public class PdfEditorUtils {
                                  List<Integer> pageNumbers,
                                  float top, float bottom, float left, float right) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument doc = PDDocument.load(is);
+             PDDocument doc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly());
              OutputStream os = ctx.getContentResolver().openOutputStream(outputUri)) {
 
             List<Integer> targetPages;
@@ -243,7 +243,7 @@ public class PdfEditorUtils {
      */
     public static int getPageCount(Context ctx, Uri uri) throws IOException {
         try (InputStream is = ctx.getContentResolver().openInputStream(uri);
-             PDDocument doc = PDDocument.load(is)) {
+             PDDocument doc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly())) {
             return doc.getNumberOfPages();
         }
     }
@@ -265,7 +265,7 @@ public class PdfEditorUtils {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
         try (InputStream is = ctx.getContentResolver().openInputStream(inputUri);
-             PDDocument doc = PDDocument.load(is)) {
+             PDDocument doc = PDDocument.load(is, com.tom_roush.pdfbox.io.MemoryUsageSetting.setupTempFileOnly())) {
 
             // Iterate all pages and compress image XObjects
             for (PDPage page : doc.getPages()) {
@@ -283,7 +283,7 @@ public class PdfEditorUtils {
                             PDImageXObject compressed = JPEGFactory.createFromImage(doc, bmp, jpegQuality / 100f);
                             resources.put(xObjectName, compressed);
                         }
-                    } catch (Exception ignored) {
+                    } catch (Throwable e) {
                         // Skip XObjects that can't be processed
                     }
                 }
