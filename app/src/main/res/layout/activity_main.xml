@@ -1,740 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="@color/colorBackground">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp">
 
-        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_header"
-            android:padding="28dp"
-            android:layout_marginBottom="20dp"
-            android:gravity="center">
+            android:orientation="vertical">
 
+            <!-- Top Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="@color/colorPrimary">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="FluxPDF"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_avatar">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="F"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- Search Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_search_bar"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_search"
+                    android:layout_marginEnd="10dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Search tools..."
+                    android:textColor="@color/colorTextHint"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Quick Actions Row -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:scrollbars="none"
+                android:clipToPadding="false"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout android:id="@+id/cardViewPdf" style="@style/QuickActionStyle">
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_view" app:tint="@color/cardIconView" android:layout_marginEnd="6dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="View" android:textSize="13sp" android:textColor="@color/colorTextPrimary" />
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/cardMerge" style="@style/QuickActionStyle">
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_merge" app:tint="@color/cardIconMerge" android:layout_marginEnd="6dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Merge" android:textSize="13sp" android:textColor="@color/colorTextPrimary" />
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/cardCompress" style="@style/QuickActionStyle">
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_compress" app:tint="@color/cardIconCompress" android:layout_marginEnd="6dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Compress" android:textSize="13sp" android:textColor="@color/colorTextPrimary" />
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/cardOcr" style="@style/QuickActionStyle">
+                        <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_ocr" app:tint="@color/cardIconOcr" android:layout_marginEnd="6dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="OCR" android:textSize="13sp" android:textColor="@color/colorTextPrimary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Section: Edit Tools -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="⚡"
-                android:textSize="36sp"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textSize="28sp"
+                android:text="Edit Tools"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/white"
+                android:textColor="@color/colorTextPrimary"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="10dp"
                 android:fontFamily="sans-serif-medium" />
 
+            <!-- Grid: 2 columns -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <!-- Row 1 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
+                    <include layout="@layout/item_tool_card_add_page" />
+                    <include layout="@layout/item_tool_card_delete" />
+                </LinearLayout>
+                <!-- Row 2 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
+                    <include layout="@layout/item_tool_card_reorder" />
+                    <include layout="@layout/item_tool_card_rotate" />
+                </LinearLayout>
+                <!-- Row 3 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
+                    <include layout="@layout/item_tool_card_split" />
+                    <include layout="@layout/item_tool_card_extract" />
+                </LinearLayout>
+                <!-- Row 4 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
+                    <include layout="@layout/item_tool_card_crop" />
+                    <include layout="@layout/item_tool_card_edit_text" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Footer -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/app_subtitle"
-                android:textSize="14sp"
-                android:textColor="#B0FFFFFF"
-                android:layout_marginTop="4dp" />
+                android:text="Select a tool to get started"
+                android:textSize="12sp"
+                android:textColor="@color/colorTextHint"
+                android:gravity="center"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="16dp" />
+
         </LinearLayout>
+    </ScrollView>
 
-        <!-- Row 1: View PDF + Add Page -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp"
-            android:weightSum="2">
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardViewPdf"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgView"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_view"
-                            app:tint="@color/cardIconView" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_view"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_view"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardAddPage"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgAddPage"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_add_page"
-                            app:tint="@color/cardIconAddPage" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_add_page"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_add_page"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_home" app:tint="@color/colorPrimary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textColor="@color/colorPrimary" android:layout_marginTop="2dp" />
         </LinearLayout>
-
-        <!-- Row 2: Delete Pages + Reorder -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp"
-            android:weightSum="2">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardDeletePage"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgDelete"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_delete_page"
-                            app:tint="@color/cardIconDelete" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_delete_page"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_delete_page"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardReorder"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgReorder"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_reorder"
-                            app:tint="@color/cardIconReorder" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_reorder"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_reorder"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_tools" app:tint="@color/colorTextSecondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tools" android:textSize="10sp" android:textColor="@color/colorTextSecondary" android:layout_marginTop="2dp" />
         </LinearLayout>
-
-        <!-- Row 3: Rotate + Split -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp"
-            android:weightSum="2">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardRotate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgRotate"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_rotate"
-                            app:tint="@color/cardIconRotate" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_rotate"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_rotate"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardSplit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgSplit"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_split"
-                            app:tint="@color/cardIconSplit" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_split"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_split"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_files" app:tint="@color/colorTextSecondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Files" android:textSize="10sp" android:textColor="@color/colorTextSecondary" android:layout_marginTop="2dp" />
         </LinearLayout>
-
-        <!-- Row 4: Merge + Extract -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp"
-            android:weightSum="2">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardMerge"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgMerge"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_merge"
-                            app:tint="@color/cardIconMerge" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_merge"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_merge"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardExtract"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgExtract"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_extract"
-                            app:tint="@color/cardIconExtract" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_extract"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_extract"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_me" app:tint="@color/colorTextSecondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Me" android:textSize="10sp" android:textColor="@color/colorTextSecondary" android:layout_marginTop="2dp" />
         </LinearLayout>
-
-        <!-- Row 5: Crop + OCR -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp"
-            android:weightSum="2">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardCrop"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgCrop"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_crop"
-                            app:tint="@color/cardIconCrop" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_crop"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_crop"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardOcr"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgOcr"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_ocr"
-                            app:tint="@color/cardIconOcr" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_ocr"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_ocr"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <!-- Row 6: Compress PDF -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp"
-            android:weightSum="2">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardCompress"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgCompress"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_compress"
-                            app:tint="@color/cardIconCompress" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_compress"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_compress"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardEditText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_icon_circle"
-                        android:backgroundTint="@color/cardIconBgRotate"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_edit_text"
-                            app:tint="@color/cardIconRotate" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/title_edit_text"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/colorTextPrimary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/desc_edit_text"
-                        android:textSize="11sp"
-                        android:textColor="@color/colorTextSecondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <!-- Footer -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select a tool to get started"
-            android:textSize="12sp"
-            android:textColor="@color/colorTextSecondary"
-            android:gravity="center"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp" />
-
     </LinearLayout>
-</ScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -135,18 +135,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        binding.cardAddPage.setOnClickListener(v -> startOperation(OP_ADD_PAGE));
-        binding.cardDeletePage.setOnClickListener(v -> startOperation(OP_DELETE_PAGES));
-        binding.cardReorder.setOnClickListener(v -> startOperation(OP_REORDER));
-        binding.cardRotate.setOnClickListener(v -> startOperation(OP_ROTATE));
-        binding.cardSplit.setOnClickListener(v -> startOperation(OP_SPLIT));
-        binding.cardMerge.setOnClickListener(v -> startOperation(OP_MERGE));
-        binding.cardExtract.setOnClickListener(v -> startOperation(OP_EXTRACT));
-        binding.cardCrop.setOnClickListener(v -> startOperation(OP_CROP));
-        binding.cardViewPdf.setOnClickListener(v -> startOperation(OP_VIEW));
-        binding.cardOcr.setOnClickListener(v -> startOperation(OP_OCR));
-        binding.cardCompress.setOnClickListener(v -> startOperation(OP_COMPRESS));
-        binding.cardEditText.setOnClickListener(v -> startOperation(OP_EDIT_TEXT));
+        findViewById(R.id.cardAddPage).setOnClickListener(v -> startOperation(OP_ADD_PAGE));
+        findViewById(R.id.cardDeletePage).setOnClickListener(v -> startOperation(OP_DELETE_PAGES));
+        findViewById(R.id.cardReorder).setOnClickListener(v -> startOperation(OP_REORDER));
+        findViewById(R.id.cardRotate).setOnClickListener(v -> startOperation(OP_ROTATE));
+        findViewById(R.id.cardSplit).setOnClickListener(v -> startOperation(OP_SPLIT));
+        findViewById(R.id.cardMerge).setOnClickListener(v -> startOperation(OP_MERGE));
+        findViewById(R.id.cardExtract).setOnClickListener(v -> startOperation(OP_EXTRACT));
+        findViewById(R.id.cardCrop).setOnClickListener(v -> startOperation(OP_CROP));
+        findViewById(R.id.cardViewPdf).setOnClickListener(v -> startOperation(OP_VIEW));
+        findViewById(R.id.cardOcr).setOnClickListener(v -> startOperation(OP_OCR));
+        findViewById(R.id.cardCompress).setOnClickListener(v -> startOperation(OP_COMPRESS));
+        findViewById(R.id.cardEditText).setOnClickListener(v -> startOperation(OP_EDIT_TEXT));
     }
 
     private void startOperation(int operation) {
