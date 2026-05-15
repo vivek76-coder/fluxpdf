@@ -1,17 +1,29 @@
 package com.editing.fluxpdf;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.text.InputType;
+import android.graphics.Typeface;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.editing.fluxpdf.databinding.ActivityMainBinding;
 import com.google.mlkit.vision.common.InputImage;
@@ -79,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
 
         setupLaunchers();
         setupClickListeners();
+        setupBottomNavigation();
+        setupMeButtons();
+        setupFilesList();
     }
 
     private void setupLaunchers() {
@@ -148,6 +163,149 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.cardCompress).setOnClickListener(v -> startOperation(OP_COMPRESS));
         findViewById(R.id.cardEditText).setOnClickListener(v -> startOperation(OP_EDIT_TEXT));
     }
+
+    private void setupBottomNavigation() {
+        View navTools = findViewById(R.id.navTools);
+        View navFiles = findViewById(R.id.navFiles);
+        View navMe = findViewById(R.id.navMe);
+
+        navTools.setOnClickListener(v -> switchTab(0));
+        navFiles.setOnClickListener(v -> switchTab(1));
+        navMe.setOnClickListener(v -> switchTab(2));
+        
+        // Initial state
+        switchTab(0);
+    }
+
+    private void switchTab(int index) {
+        View sectionHome = findViewById(R.id.sectionHome);
+        View sectionFiles = findViewById(R.id.sectionFiles);
+        View sectionMe = findViewById(R.id.sectionMe);
+
+        sectionHome.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+        sectionFiles.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        sectionMe.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+
+        updateTabState(findViewById(R.id.navToolsIcon), findViewById(R.id.navToolsText), findViewById(R.id.navToolsIndicator), index == 0);
+        updateTabState(findViewById(R.id.navFilesIcon), findViewById(R.id.navFilesText), findViewById(R.id.navFilesIndicator), index == 1);
+        updateTabState(findViewById(R.id.navMeIcon), findViewById(R.id.navMeText), findViewById(R.id.navMeIndicator), index == 2);
+
+        if (index == 1) refreshFilesList();
+    }
+
+    private void updateTabState(ImageView icon, TextView text, FrameLayout indicator, boolean isSelected) {
+        int colorRes = isSelected ? R.color.colorPrimary : R.color.colorTextSecondary;
+        int color = ContextCompat.getColor(this, colorRes);
+        icon.setColorFilter(color);
+        text.setTextColor(color);
+        text.setTypeface(null, isSelected ? Typeface.BOLD : Typeface.NORMAL);
+        indicator.setBackgroundResource(isSelected ? R.drawable.bg_nav_indicator : android.R.color.transparent);
+    }
+
+    // ---- Files Section ----
+
+    private void setupFilesList() {
+        RecyclerView rv = findViewById(R.id.rvRecentFiles);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        refreshFilesList();
+    }
+
+    private void refreshFilesList() {
+        RecyclerView rv = findViewById(R.id.rvRecentFiles);
+        View emptyState = findViewById(R.id.filesEmptyState);
+        List<RecentFilesManager.RecentFile> files = RecentFilesManager.getFiles(this);
+        if (files.isEmpty()) {
+            rv.setVisibility(View.GONE);
+            emptyState.setVisibility(View.VISIBLE);
+        } else {
+            emptyState.setVisibility(View.GONE);
+            rv.setVisibility(View.VISIBLE);
+            rv.setAdapter(new RecentFilesAdapter(files, file -> {
+                Uri uri = Uri.parse(file.uri);
+                Intent intent = new Intent(this, PdfViewerActivity.class);
+                intent.putExtra(PdfViewerActivity.EXTRA_PDF_URI, uri);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(intent);
+            }));
+        }
+    }
+
+    // ---- Me Section ----
+
+    private void setupMeButtons() {
+        // Clear History
+        findViewById(R.id.btnClearHistory).setOnClickListener(v ->
+            new AlertDialog.Builder(this)
+                .setTitle("Clear History")
+                .setMessage("Remove all recent files from the list?")
+                .setPositiveButton("Clear", (d, w) -> {
+                    RecentFilesManager.clearAll(this);
+                    Toast.makeText(this, "History cleared", Toast.LENGTH_SHORT).show();
+                    refreshFilesList();
+                })
+                .setNegativeButton("Cancel", null)
+                .show());
+
+        // Rate App
+        findViewById(R.id.btnRateApp).setOnClickListener(v -> {
+            String pkg = getPackageName();
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("market://details?id=" + pkg)));
+            } catch (Exception e) {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=" + pkg)));
+            }
+        });
+
+        // Share App
+        findViewById(R.id.btnShareApp).setOnClickListener(v -> {
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("text/plain");
+            share.putExtra(Intent.EXTRA_SUBJECT, "FluxPDF – Professional PDF Editor");
+            share.putExtra(Intent.EXTRA_TEXT,
+                "Check out FluxPDF – a powerful PDF editor for Android!\n"
+                + "https://play.google.com/store/apps/details?id=" + getPackageName());
+            startActivity(Intent.createChooser(share, "Share FluxPDF"));
+        });
+
+        // Privacy Policy
+        findViewById(R.id.btnPrivacyPolicy).setOnClickListener(v ->
+            new AlertDialog.Builder(this)
+                .setTitle("Privacy Policy")
+                .setMessage("FluxPDF does not collect, store, or share any personal data. "
+                    + "All PDF processing happens entirely on your device. "
+                    + "No files are uploaded to any server.\n\n"
+                    + "For full details visit:\nhttps://fluxpdf.example.com/privacy")
+                .setPositiveButton("Open in Browser", (d, w) ->
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://fluxpdf.example.com/privacy"))))
+                .setNegativeButton("Close", null)
+                .show());
+
+        // Version Info
+        findViewById(R.id.btnVersionInfo).setOnClickListener(v -> {
+            String versionName = "1.0";
+            int versionCode = 1;
+            try {
+                PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+                versionName = pi.versionName;
+                versionCode = (int) (Build.VERSION.SDK_INT >= 28
+                    ? pi.getLongVersionCode() : pi.versionCode);
+            } catch (Exception ignored) {}
+            new AlertDialog.Builder(this)
+                .setTitle("FluxPDF")
+                .setMessage(
+                    "Version: " + versionName + " (" + versionCode + ")\n"
+                    + "Min Android: 7.0 (API 24)\n"
+                    + "PDF Engine: Apache PDFBox\n"
+                    + "OCR: Google ML Kit\n\n"
+                    + "\u00a9 2024 FluxPDF. All rights reserved.")
+                .setPositiveButton("OK", null)
+                .show();
+        });
+    }
+
 
     private void startOperation(int operation) {
         currentOperation = operation;
@@ -449,9 +607,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void openPdfViewer() {
         if (inputUri != null) {
+            String name = getFileName(inputUri);
+            RecentFilesManager.addFile(this, inputUri, name);
             Intent intent = new Intent(this, PdfViewerActivity.class);
             intent.putExtra(PdfViewerActivity.EXTRA_PDF_URI, inputUri);
-            // Grant read permission to the viewer activity
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         }
@@ -459,11 +618,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void openPdfTextEditor() {
         if (inputUri != null) {
+            String name = getFileName(inputUri);
+            RecentFilesManager.addFile(this, inputUri, name);
             Intent intent = new Intent(this, PdfTextEditorActivity.class);
             intent.putExtra(PdfTextEditorActivity.EXTRA_PDF_URI, inputUri);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         }
+    }
+
+    private String getFileName(Uri uri) {
+        String result = null;
+        if ("content".equals(uri.getScheme())) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (idx >= 0) result = cursor.getString(idx);
+                }
+            } catch (Exception ignored) {}
+        }
+        if (result == null) {
+            result = uri.getLastPathSegment();
+        }
+        return result != null ? result : "document.pdf";
     }
 
     private void performOcr(Uri imageUri, Uri outputUri) {

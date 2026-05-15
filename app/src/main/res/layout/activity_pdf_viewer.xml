@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/colorBackground">
+        android:background="#2A2A2A">
 
         <!-- Toolbar -->
         <com.google.android.material.appbar.MaterialToolbar
@@ -23,86 +23,110 @@
             app:title="PDF Viewer"
             app:navigationIcon="@drawable/ic_menu" />
 
-        <!-- Zoom controls (Moved to Top) -->
+        <!-- Top controls bar: zoom + page info -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="8dp"
-            android:background="@color/colorSurface">
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:background="#1F1F1F"
+            android:elevation="4dp">
 
+            <!-- Zoom out -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnZoomOut"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="48dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="40dp"
                 android:layout_height="36dp"
                 android:text="−"
-                android:textSize="18sp"
-                app:cornerRadius="8dp"
+                android:textSize="20sp"
+                android:textColor="@color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp" />
+                android:insetBottom="0dp"
+                app:cornerRadius="8dp" />
 
             <TextView
                 android:id="@+id/tvZoomLevel"
-                android:layout_width="wrap_content"
+                android:layout_width="52dp"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:text="100%"
-                android:textSize="14sp"
-                android:textColor="@color/colorTextPrimary"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp" />
+                android:textSize="13sp"
+                android:textColor="#CCCCCC" />
 
+            <!-- Zoom in -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnZoomIn"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="48dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="40dp"
                 android:layout_height="36dp"
                 android:text="+"
-                android:textSize="18sp"
-                app:cornerRadius="8dp"
+                android:textSize="20sp"
+                android:textColor="@color/white"
                 android:padding="0dp"
                 android:insetTop="0dp"
-                android:insetBottom="0dp" />
+                android:insetBottom="0dp"
+                app:cornerRadius="8dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <!-- Page info (tap to jump) -->
+            <TextView
+                android:id="@+id/tvPageInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Page 1 / 1"
+                android:textSize="13sp"
+                android:textColor="#CCCCCC"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:background="?android:attr/selectableItemBackground" />
+
+            <!-- Scroll mode toggle -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScrollMode"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="⇅ Scroll"
+                android:textSize="11sp"
+                android:textColor="#AAAAAA"
+                android:padding="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="8dp" />
+
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/cardIconBgCrop" />
-
-        <!-- Scrollable PDF page view -->
-        <ScrollView
+        <!-- Continuous Scroll RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPdfPages"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:fillViewport="true">
+            android:background="#2A2A2A"
+            android:clipToPadding="false"
+            android:overScrollMode="ifContentScrolls" />
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fillViewport="true">
-
-                <ImageView
-                    android:id="@+id/ivPdfPage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitXY"
-                    android:contentDescription="PDF page" />
-            </HorizontalScrollView>
-        </ScrollView>
-
-        <!-- Page info bar (Moved to Bottom) -->
+        <!-- Prev/Next nav (shown in single-page mode) -->
         <LinearLayout
+            android:id="@+id/pageNavBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:padding="8dp"
-            android:background="@color/colorSurface">
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:background="#1F1F1F"
+            android:visibility="gone">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPrevPage"
@@ -111,18 +135,11 @@
                 android:layout_height="36dp"
                 android:text="‹ Prev"
                 android:textSize="12sp"
-                app:cornerRadius="8dp" />
+                android:textColor="@color/white"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary" />
 
-            <TextView
-                android:id="@+id/tvPageInfo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Page 1 / 1"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorTextPrimary" />
+            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNextPage"
@@ -131,12 +148,14 @@
                 android:layout_height="36dp"
                 android:text="Next ›"
                 android:textSize="12sp"
-                app:cornerRadius="8dp" />
+                android:textColor="@color/white"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/colorPrimary" />
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Navigation Drawer Content -->
+    <!-- Navigation Drawer -->
     <LinearLayout
         android:layout_width="280dp"
         android:layout_height="match_parent"
@@ -145,7 +164,6 @@
         android:orientation="vertical"
         android:elevation="8dp">
 
-        <!-- Drawer Header with gradient -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -153,7 +171,6 @@
             android:background="@color/colorHeaderBg"
             android:padding="20dp">
 
-            <!-- Icon + Title Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -184,18 +201,14 @@
                 android:layout_marginTop="6dp"
                 android:text="Tap a topic to jump"
                 android:textSize="13sp"
-                android:textColor="#B0FFFFFF"
-                android:fontFamily="sans-serif" />
-
+                android:textColor="#B0FFFFFF" />
         </LinearLayout>
 
-        <!-- Divider accent line -->
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:background="#FF7043" />
 
-        <!-- Topics List -->
         <ListView
             android:id="@+id/lvTopics"
             android:layout_width="match_parent"

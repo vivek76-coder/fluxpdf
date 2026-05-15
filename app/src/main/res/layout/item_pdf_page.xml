@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="#2A2A2A">
+
+    <ImageView
+        android:id="@+id/ivPageImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:contentDescription="PDF page" />
+
+    <!-- Thin separator between pages -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:background="#1A1A1A" />
+
+</LinearLayout>

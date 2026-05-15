@@ -5,7 +5,9 @@
     android:layout_height="match_parent"
     android:background="@color/colorBackground">
 
+    <!-- HOME (TOOLS) SECTION -->
     <ScrollView
+        android:id="@+id/sectionHome"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
@@ -113,7 +115,6 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
-            <!-- Section: Edit Tools -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -134,29 +135,24 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp">
 
-                <!-- Row 1 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
                     <include layout="@layout/item_tool_card_add_page" />
                     <include layout="@layout/item_tool_card_delete" />
                 </LinearLayout>
-                <!-- Row 2 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
                     <include layout="@layout/item_tool_card_reorder" />
                     <include layout="@layout/item_tool_card_rotate" />
                 </LinearLayout>
-                <!-- Row 3 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
                     <include layout="@layout/item_tool_card_split" />
                     <include layout="@layout/item_tool_card_extract" />
                 </LinearLayout>
-                <!-- Row 4 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp" android:weightSum="2">
                     <include layout="@layout/item_tool_card_crop" />
                     <include layout="@layout/item_tool_card_edit_text" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Footer -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -170,31 +166,335 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- FILES SECTION -->
+    <LinearLayout
+        android:id="@+id/sectionFiles"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingBottom="70dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@color/white"
+            android:elevation="2dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Files"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorDivider" />
+
+        <!-- RecyclerView for recent files -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRecentFiles"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/colorBackground"
+            android:clipToPadding="false"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/filesEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp">
+
+            <FrameLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:background="@drawable/bg_empty_state"
+                android:layout_marginBottom="24dp">
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_nav_files"
+                    app:tint="@color/colorPrimary" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No recent files"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorTextPrimary"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Documents you open or edit will appear here for quick access."
+                android:textSize="14sp"
+                android:textColor="@color/colorTextSecondary"
+                android:textAlignment="center"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ME SECTION -->
+    <ScrollView
+        android:id="@+id/sectionMe"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:visibility="gone"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_me_header"
+                android:paddingTop="48dp"
+                android:paddingBottom="32dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:gravity="center_horizontal">
+                
+                <FrameLayout
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/bg_avatar">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="F"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="32sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Flux User"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp" />
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Premium Edition"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="-20dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+                
+                <!-- Settings Card -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_me_card"
+                    android:elevation="2dp"
+                    android:padding="8dp">
+                    
+                    <LinearLayout android:id="@+id/btnClearHistory" android:layout_width="match_parent" android:layout_height="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:clickable="true" android:focusable="true" android:background="@drawable/bg_me_item">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_delete" app:tint="@color/colorTextSecondary" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Clear History" android:textColor="@color/colorTextPrimary" android:textSize="16sp" android:layout_marginStart="16dp" />
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_arrow_right" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorDivider" android:layout_marginStart="56dp" />
+
+                    <LinearLayout android:id="@+id/btnRateApp" android:layout_width="match_parent" android:layout_height="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:clickable="true" android:focusable="true" android:background="@drawable/bg_me_item">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_star" app:tint="@color/colorTextSecondary" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Rate App" android:textColor="@color/colorTextPrimary" android:textSize="16sp" android:layout_marginStart="16dp" />
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_arrow_right" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorDivider" android:layout_marginStart="56dp" />
+
+                    <LinearLayout android:id="@+id/btnShareApp" android:layout_width="match_parent" android:layout_height="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:clickable="true" android:focusable="true" android:background="@drawable/bg_me_item">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_share" app:tint="@color/colorTextSecondary" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Share App" android:textColor="@color/colorTextPrimary" android:textSize="16sp" android:layout_marginStart="16dp" />
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_arrow_right" />
+                    </LinearLayout>
+                </LinearLayout>
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ABOUT"
+                    android:textColor="@color/colorTextHint"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginBottom="8dp" />
+                    
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_me_card"
+                    android:elevation="2dp"
+                    android:padding="8dp">
+                    
+                    <LinearLayout android:id="@+id/btnPrivacyPolicy" android:layout_width="match_parent" android:layout_height="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:clickable="true" android:focusable="true" android:background="@drawable/bg_me_item">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_privacy" app:tint="@color/colorTextSecondary" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Privacy Policy" android:textColor="@color/colorTextPrimary" android:textSize="16sp" android:layout_marginStart="16dp" />
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_arrow_right" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/colorDivider" android:layout_marginStart="56dp" />
+
+                    <LinearLayout android:id="@+id/btnVersionInfo" android:layout_width="match_parent" android:layout_height="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:clickable="true" android:focusable="true" android:background="@drawable/bg_me_item">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_info" app:tint="@color/colorTextSecondary" />
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Version Info" android:textColor="@color/colorTextPrimary" android:textSize="16sp" android:layout_marginStart="16dp" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="v1.0" android:textColor="@color/colorTextSecondary" android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+                
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
     <!-- Bottom Navigation -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="66dp"
         android:layout_gravity="bottom"
-        android:background="@color/white"
-        android:elevation="8dp"
+        android:background="@drawable/bg_bottom_nav"
+        android:elevation="16dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_home" app:tint="@color/colorPrimary" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textColor="@color/colorPrimary" android:layout_marginTop="2dp" />
+        <LinearLayout 
+            android:id="@+id/navTools"
+            android:layout_width="0dp" 
+            android:layout_height="match_parent" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+            <FrameLayout
+                android:id="@+id/navToolsIndicator"
+                android:layout_width="64dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_nav_indicator">
+                <ImageView 
+                    android:id="@+id/navToolsIcon"
+                    android:layout_width="24dp" 
+                    android:layout_height="24dp" 
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_nav_tools" 
+                    app:tint="@color/colorPrimary" />
+            </FrameLayout>
+            <TextView 
+                android:id="@+id/navToolsText"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:text="Tools" 
+                android:textSize="12sp" 
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary" 
+                android:layout_marginTop="4dp" />
         </LinearLayout>
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_tools" app:tint="@color/colorTextSecondary" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tools" android:textSize="10sp" android:textColor="@color/colorTextSecondary" android:layout_marginTop="2dp" />
+        
+        <LinearLayout 
+            android:id="@+id/navFiles"
+            android:layout_width="0dp" 
+            android:layout_height="match_parent" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+            <FrameLayout
+                android:id="@+id/navFilesIndicator"
+                android:layout_width="64dp"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent">
+                <ImageView 
+                    android:id="@+id/navFilesIcon"
+                    android:layout_width="24dp" 
+                    android:layout_height="24dp" 
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_nav_files" 
+                    app:tint="@color/colorTextSecondary" />
+            </FrameLayout>
+            <TextView 
+                android:id="@+id/navFilesText"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:text="Files" 
+                android:textSize="12sp" 
+                android:textStyle="normal"
+                android:textColor="@color/colorTextSecondary" 
+                android:layout_marginTop="4dp" />
         </LinearLayout>
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_files" app:tint="@color/colorTextSecondary" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Files" android:textSize="10sp" android:textColor="@color/colorTextSecondary" android:layout_marginTop="2dp" />
-        </LinearLayout>
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_nav_me" app:tint="@color/colorTextSecondary" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Me" android:textSize="10sp" android:textColor="@color/colorTextSecondary" android:layout_marginTop="2dp" />
+        
+        <LinearLayout 
+            android:id="@+id/navMe"
+            android:layout_width="0dp" 
+            android:layout_height="match_parent" 
+            android:layout_weight="1" 
+            android:gravity="center" 
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+            <FrameLayout
+                android:id="@+id/navMeIndicator"
+                android:layout_width="64dp"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent">
+                <ImageView 
+                    android:id="@+id/navMeIcon"
+                    android:layout_width="24dp" 
+                    android:layout_height="24dp" 
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_nav_me" 
+                    app:tint="@color/colorTextSecondary" />
+            </FrameLayout>
+            <TextView 
+                android:id="@+id/navMeText"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:text="Me" 
+                android:textSize="12sp" 
+                android:textStyle="normal"
+                android:textColor="@color/colorTextSecondary" 
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </LinearLayout>
 

@@ -2,7 +2,6 @@ package com.editing.fluxpdf;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
@@ -14,12 +13,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.editing.fluxpdf.databinding.ActivityPdfViewerBinding;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
@@ -50,17 +51,18 @@ public class PdfViewerActivity extends AppCompatActivity {
     private ActivityPdfViewerBinding binding;
     private PDDocument document;
     private PDFRenderer renderer;
+    private PdfPagesAdapter pagesAdapter;
+    private PagerSnapHelper snapHelper;
+    private LinearLayoutManager layoutManager;
+
     private int currentPage = 0;
     private int totalPages = 0;
-    private float zoomLevel = 1.5f; // DPI multiplier: 1.0 = 72dpi, 1.5 = 108dpi, 2.0 = 144dpi
+    private float zoomLevel = 1.5f; // DPI multiplier
+    private boolean isContinuousScroll = true;
 
     // Topics / Outlines
     private List<String> topicTitles = new ArrayList<>();
     private List<Integer> topicPages = new ArrayList<>();
-
-    // Track current render to avoid race conditions
-    private volatile int renderGeneration = 0;
-    private Bitmap currentBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +95,8 @@ public class PdfViewerActivity extends AppCompatActivity {
         binding.btnNextPage.setOnClickListener(v -> navigatePage(1));
         binding.btnZoomIn.setOnClickListener(v -> zoom(0.25f));
         binding.btnZoomOut.setOnClickListener(v -> zoom(-0.25f));
+        
+        binding.btnScrollMode.setOnClickListener(v -> toggleScrollMode());
 
         // Page jump: tap on page info text to jump to a specific page
         binding.tvPageInfo.setOnClickListener(v -> showPageJumpDialog());
@@ -101,14 +105,53 @@ public class PdfViewerActivity extends AppCompatActivity {
         binding.lvTopics.setOnItemClickListener((parent, view, position, id) -> {
             int page = topicPages.get(position);
             if (page >= 0 && page < totalPages) {
-                currentPage = page;
-                updatePageInfo();
-                renderCurrentPage();
+                jumpToPage(page + 1);
             }
             binding.drawerLayout.closeDrawer(GravityCompat.START);
         });
 
+        // Setup RecyclerView scrolling listener to update page info
+        binding.rvPdfPages.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (layoutManager != null) {
+                    int firstVisible = layoutManager.findFirstVisibleItemPosition();
+                    if (firstVisible != RecyclerView.NO_POSITION && firstVisible != currentPage) {
+                        currentPage = firstVisible;
+                        updatePageInfo();
+                    }
+                }
+            }
+        });
+
         loadPdf(pdfUri);
+    }
+
+    private void toggleScrollMode() {
+        isContinuousScroll = !isContinuousScroll;
+        setupRecyclerView();
+        jumpToPage(currentPage + 1);
+    }
+
+    private void setupRecyclerView() {
+        if (snapHelper != null) {
+            snapHelper.attachToRecyclerView(null);
+            snapHelper = null;
+        }
+        
+        if (isContinuousScroll) {
+            binding.btnScrollMode.setText("⇅ Scroll");
+            binding.pageNavBar.setVisibility(View.GONE);
+            layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        } else {
+            binding.btnScrollMode.setText("⇹ Page");
+            binding.pageNavBar.setVisibility(View.VISIBLE);
+            layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            snapHelper = new PagerSnapHelper();
+            snapHelper.attachToRecyclerView(binding.rvPdfPages);
+        }
+        binding.rvPdfPages.setLayoutManager(layoutManager);
     }
 
     /**
@@ -156,15 +199,16 @@ public class PdfViewerActivity extends AppCompatActivity {
                     float pageWidth = mediaBox.getWidth();
                     if (pageWidth > 0) {
                         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-                        // Subtract some padding (e.g., 32px)
                         zoomLevel = (screenWidth - 32) / pageWidth;
                     }
                 }
 
                 runOnUiThread(() -> {
+                    pagesAdapter = new PdfPagesAdapter(document, renderer, zoomLevel);
+                    setupRecyclerView();
+                    binding.rvPdfPages.setAdapter(pagesAdapter);
                     updatePageInfo();
                     updateZoomText();
-                    renderCurrentPage();
                     populateTopicsList();
                 });
             } catch (Throwable e) {
@@ -275,11 +319,11 @@ public class PdfViewerActivity extends AppCompatActivity {
     }
 
     private void navigatePage(int direction) {
-        int newPage = currentPage + direction;
-        if (newPage >= 0 && newPage < totalPages) {
-            currentPage = newPage;
-            updatePageInfo();
-            renderCurrentPage();
+        if (!isContinuousScroll) {
+            int newPage = currentPage + direction;
+            if (newPage >= 0 && newPage < totalPages) {
+                binding.rvPdfPages.smoothScrollToPosition(newPage);
+            }
         }
     }
 
@@ -287,9 +331,9 @@ public class PdfViewerActivity extends AppCompatActivity {
         // pageNumber is 1-based from user input
         int zeroBasedPage = pageNumber - 1;
         if (zeroBasedPage >= 0 && zeroBasedPage < totalPages) {
+            binding.rvPdfPages.scrollToPosition(zeroBasedPage);
             currentPage = zeroBasedPage;
             updatePageInfo();
-            renderCurrentPage();
         } else {
             Toast.makeText(this, "Page must be between 1 and " + totalPages, Toast.LENGTH_SHORT).show();
         }
@@ -331,12 +375,17 @@ public class PdfViewerActivity extends AppCompatActivity {
         if (newZoom >= 0.5f && newZoom <= 5.0f) {
             zoomLevel = newZoom;
             updateZoomText();
-            renderCurrentPage();
+            if (pagesAdapter != null) {
+                pagesAdapter.setZoomLevel(zoomLevel);
+                // Invalidate views so they re-render at new zoom
+                pagesAdapter.notifyDataSetChanged();
+                // Ensure layout manager preserves scroll position during dataset change
+                layoutManager.scrollToPositionWithOffset(currentPage, 0);
+            }
         }
     }
 
     private void updateZoomText() {
-        // Show percentage relative to 1.0 scale (72 DPI)
         binding.tvZoomLevel.setText(Math.round(zoomLevel * 100) + "%");
     }
 
@@ -346,63 +395,7 @@ public class PdfViewerActivity extends AppCompatActivity {
         binding.btnNextPage.setEnabled(currentPage < totalPages - 1);
     }
 
-    /**
-     * Safely calculates the maximum render scale that won't exceed
-     * Android's hardware texture limit or cause OOM.
-     */
-    private float safeRenderScale(float pageW, float pageH, float desiredScale) {
-        // Android hardware texture limit is typically 4096px, stay under it
-        float maxDim = Math.max(pageW, pageH) * desiredScale;
-        if (maxDim > 4096f) {
-            desiredScale = 4096f / Math.max(pageW, pageH);
-        }
-        // Also cap total pixel count to ~16 megapixels to avoid OOM
-        float totalPixels = (pageW * desiredScale) * (pageH * desiredScale);
-        if (totalPixels > 16_000_000f) {
-            desiredScale = (float) Math.sqrt(16_000_000.0 / (pageW * pageH));
-        }
-        return Math.max(desiredScale, 0.25f);
-    }
-
-    private void renderCurrentPage() {
-        if (renderer == null) return;
-
-        final int thisGeneration = ++renderGeneration;
-
-        new Thread(() -> {
-            try {
-                // Abort if a newer render was requested
-                if (thisGeneration != renderGeneration) return;
-
-                PDRectangle mediaBox = document.getPage(currentPage).getMediaBox();
-                float pageW = mediaBox.getWidth();
-                float pageH = mediaBox.getHeight();
-
-                float scale = safeRenderScale(pageW, pageH, zoomLevel);
-                Bitmap bitmap = renderer.renderImage(currentPage, scale);
-
-                if (thisGeneration != renderGeneration) {
-                    // A newer render was requested while we were working; discard
-                    bitmap.recycle();
-                    return;
-                }
-
-                runOnUiThread(() -> {
-                    if (thisGeneration != renderGeneration) return;
-                    // Recycle old bitmap
-                    if (currentBitmap != null && !currentBitmap.isRecycled()) {
-                        currentBitmap.recycle();
-                    }
-                    currentBitmap = bitmap;
-                    binding.ivPdfPage.setImageBitmap(bitmap);
-                });
-            } catch (Throwable e) {
-                if (thisGeneration != renderGeneration) return;
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Error rendering page: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-        }).start();
-    }
+    // Rendering is now handled by PdfPagesAdapter
 
     @Override
     public void onBackPressed() {
@@ -416,9 +409,8 @@ public class PdfViewerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (currentBitmap != null && !currentBitmap.isRecycled()) {
-            currentBitmap.recycle();
-            currentBitmap = null;
+        if (pagesAdapter != null) {
+            pagesAdapter.shutdown();
         }
         if (document != null) {
             try { document.close(); } catch (Exception ignored) {}
